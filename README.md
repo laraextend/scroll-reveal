@@ -55,7 +55,56 @@ This package generates the HTML `data-*` attributes for the animation driver. Yo
 
 ---
 
-#### Option A — Built-in driver (recommended, zero npm dependency)
+#### Option A — Vite / app.js (recommended)
+
+The driver is bundled via Vite — no `<x-scroll-reveal-scripts>` in the layout required.
+
+**Step 1 — Publish the driver to `resources/js/`:**
+
+```bash
+php artisan vendor:publish --tag=scroll-reveal-js
+```
+
+This copies `scroll-reveal-driver.js` to `resources/js/scroll-reveal-driver.js` so Vite can bundle it.
+
+**Step 2 — Install Animate.css:**
+
+```bash
+npm install animate.css
+```
+
+**Step 3 — Add to `resources/js/app.js`:**
+
+```js
+import './scroll-reveal-driver.js'; // sets window.ScrollRevealDriver
+import 'animate.css';
+
+let driver;
+
+function init() {
+    if (driver) driver.destroy();
+    driver = new ScrollRevealDriver({ initClass: 'animateme', offset: 0.2 });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('livewire:navigated', init);
+```
+
+**Step 4 — Import the CSS** in your stylesheet (e.g. `resources/css/app.css`):
+
+```css
+@import 'animate.css';
+```
+
+**Step 5 — Restart the dev server:**
+
+```bash
+npm run dev
+```
+
+---
+
+#### Option B — Built-in driver without Vite
 
 The package ships its own Intersection Observer driver. Publish it to your `public/` directory once:
 
@@ -96,42 +145,6 @@ Inline mode (no publish step needed at all):
 
 ```blade
 <x-scroll-reveal-scripts :inline="true" />
-```
-
----
-
-#### Option B — npm + Vite bundler (Animate.css only)
-
-Use this option if you prefer to manage everything through your Vite build pipeline. The built-in driver is used for JavaScript — only Animate.css needs to be installed.
-
-**Step 1 — Install Animate.css:**
-
-```bash
-npm install animate.css
-```
-
-**Step 2 — Publish the driver asset** (once):
-
-```bash
-php artisan vendor:publish --tag=scroll-reveal-assets
-```
-
-**Step 3 — Import the CSS** in your stylesheet (e.g. `resources/css/app.css`):
-
-```css
-@import 'animate.css';
-```
-
-**Step 4 — Add `<x-scroll-reveal-scripts>` to your layout** before `</body>`:
-
-```blade
-<x-scroll-reveal-scripts />
-```
-
-**Step 5 — Restart the dev server:**
-
-```bash
-npm run dev
 ```
 
 ---

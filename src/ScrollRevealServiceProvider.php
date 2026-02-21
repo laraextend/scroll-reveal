@@ -32,10 +32,17 @@ class ScrollRevealServiceProvider extends ServiceProvider
                 __DIR__.'/../config/scroll-reveal.php' => config_path('scroll-reveal.php'),
             ], 'scroll-reveal-config');
 
+            // Publish to public/ — used by <x-scroll-reveal-scripts> (no Vite build step)
             $this->publishes([
                 __DIR__.'/../resources/js/scroll-reveal-driver.js'
                     => public_path('vendor/scroll-reveal/scroll-reveal-driver.js'),
             ], 'scroll-reveal-assets');
+
+            // Publish to resources/js/ — used when bundling via Vite / app.js
+            $this->publishes([
+                __DIR__.'/../resources/js/scroll-reveal-driver.js'
+                    => resource_path('js/scroll-reveal-driver.js'),
+            ], 'scroll-reveal-js');
         }
     }
 }
