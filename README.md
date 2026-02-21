@@ -47,21 +47,21 @@ composer require laraextend/scroll-reveal
 
 ### 2. JavaScript Setup
 
-This package only generates the HTML data-attributes that josh.js reads. You must include **josh.js** and **Animate.css** in your frontend yourself. Choose one of the two options below.
+This package only generates the HTML data-attributes that josh.js reads. You must include **josh.js** and its bundled **Animate.css** in your frontend yourself. Choose one of the two options below.
 
 ---
 
-#### Option A — CDN (recommended for a quick start)
+#### Option A — CDN (quick start, no build step)
 
 No npm install needed. Add directly to your layout file (e.g. `resources/views/layouts/app.blade.php`).
 
 Inside `<head>`:
 
 ```html
-<!-- Animate.css -->
+<!-- Animate.css (bundled with josh.js) -->
 <link
   rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  href="https://unpkg.com/joshjs/css/animate.css"
 />
 ```
 
@@ -69,14 +69,12 @@ Before the closing `</body>` tag:
 
 ```html
 <!-- josh.js -->
-<script src="https://unpkg.com/josh.js/dist/josh.min.js"></script>
+<script src="https://unpkg.com/joshjs/dist/josh.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     new Josh({
       initClass: 'animateme',   // must match the class added by the component
       offset: 0.2,              // fraction of element visible before animating
-      animateIn: true,
-      animateOut: false,        // set to true to re-animate elements on scroll-out
     });
   });
 </script>
@@ -84,59 +82,46 @@ Before the closing `</body>` tag:
 
 ---
 
-#### Option B — npm + Vite bundler
+#### Option B — npm + Vite bundler (recommended)
 
-**Step 1 — Install the npm packages** (required before any `import` statement will work):
+The npm package is **`joshjs`**. Animate.css is bundled inside it — no separate install needed.
 
-```bash
-npm install josh.js animate.css
-```
-
-> If you skip this step and add the `import` lines first, Vite will throw:
-> `Failed to resolve import "josh.js" — Does the file exist?`
-> Run the install command above and then restart `npm run dev`.
-
-**Step 2 — Add the imports** to `resources/js/app.js`:
-
-```js
-import Josh from 'josh.js';
-import 'animate.css';
-
-document.addEventListener('DOMContentLoaded', () => {
-  new Josh({
-    initClass: 'animateme',
-    offset: 0.2,
-    animateIn: true,
-    animateOut: false,
-  });
-});
-```
-
-**Step 3 — Restart the dev server:**
+**Step 1 — Install:**
 
 ```bash
-npm run dev
+npm install joshjs
 ```
 
----
-
-#### Livewire — re-initialize after navigation
-
-When using Livewire's SPA navigation, josh.js must be re-initialized after each page transition. Add the `livewire:navigated` listener alongside your `DOMContentLoaded` handler:
+**Step 2 — Import in your JavaScript file** (e.g. `resources/js/app.js`):
 
 ```js
-import Josh from 'josh.js';
-import 'animate.css';
+import Josh from 'joshjs';
 
 let josh;
 
 function initJosh() {
-  if (josh) josh.destroy?.();   // destroy the previous instance before creating a new one
-  josh = new Josh({ initClass: 'animateme', offset: 0.2 });
+    if (josh) josh.destroy?.();
+    josh = new Josh({ initClass: 'animateme', offset: 0.2 });
 }
 
-document.addEventListener('DOMContentLoaded', initJosh);
+document.addEventListener('DOMContentLoaded', () => {
+    initJosh();
+});
+
+// Re-initialize after Livewire SPA navigation
 document.addEventListener('livewire:navigated', initJosh);
+```
+
+**Step 3 — Import the CSS** in your stylesheet (e.g. `resources/css/app.css`):
+
+```css
+@import 'joshjs/css/animate.css';
+```
+
+**Step 4 — Restart the dev server:**
+
+```bash
+npm run dev
 ```
 
 ### 3. Done!
