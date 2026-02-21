@@ -1,0 +1,59 @@
+{
+    "name": "laraextend/scroll-reveal",
+    "description": "Flexible, Livewire-compatible scroll-reveal animation component for Laravel Blade — powered by josh.js.",
+    "keywords": [
+        "laravel",
+        "scroll-reveal",
+        "animation",
+        "blade",
+        "livewire",
+        "josh.js",
+        "animate.css",
+        "scroll",
+        "intersection-observer",
+        "performance"
+    ],
+    "homepage": "https://github.com/laraextend/scroll-reveal",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Arash Saffari"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/view": "^10.0|^11.0|^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.5|^9.0|^10.0",
+        "pestphp/pest": "^3.0",
+        "phpunit/phpunit": "^10.1|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Laraextend\\ScrollReveal\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Laraextend\\ScrollReveal\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Laraextend\\ScrollReveal\\ScrollRevealServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
