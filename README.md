@@ -7,17 +7,20 @@
 
 # Laravel Scroll Reveal
 
-**Scroll-triggered animations for Laravel Blade — powered by josh.js and Animate.css.**
+**Scroll-triggered animations for Laravel Blade — powered by Animate.css.**
 
-`laraextend/scroll-reveal` provides a single, flexible `<x-scroll-reveal>` Blade component that wraps any content in a scroll-triggered animation. Built on top of [josh.js](https://techandmedia.in/josh-js/docs/) and [Animate.css](https://animate.style/), it works seamlessly in plain Blade templates and is fully Livewire-compatible.
+`laraextend/scroll-reveal` provides a flexible `<x-scroll-reveal>` Blade component that wraps any content in a scroll-triggered animation. It ships with its own **zero-dependency JavaScript driver** (built on the native Intersection Observer API) and works seamlessly in plain Blade templates and Livewire.
+
+> **No external JavaScript runtime required.** The package includes its own driver script (`scroll-reveal-driver.js`) — no third-party npm package needed.
 
 ---
 
 ## ✨ Features
 
 - **🧩 One Blade Component** — `<x-scroll-reveal>` wraps any HTML content with scroll-triggered animations
+- **🎬 Built-in JS Driver** — `<x-scroll-reveal-scripts>` injects a zero-dependency Intersection Observer driver — no npm package required
 - **🎨 30+ Animation Aliases** — Intuitive names (`fade-up`, `zoom-in`, `slide-left`, …) mapped to Animate.css classes
-- **⚡ Livewire Ready** — All `wire:*`, `x-*` and `data-*` attributes are forwarded automatically
+- **⚡ Livewire Ready** — All `wire:*`, `x-*` and `data-*` attributes are forwarded automatically; re-initialized after `livewire:navigated`
 - **🏷️ Dynamic HTML Tag** — Render as any element (`div`, `section`, `article`, `span`, …) via the `as` prop
 - **⏱️ Timing Control** — Fine-grained `duration` and `delay` props per element
 - **🔇 Opt-Out Anywhere** — Pass `:animate="false"` to disable animation for a specific element at runtime
@@ -30,8 +33,7 @@
 
 - **PHP** >= 8.2
 - **Laravel** >= 10.x
-- **josh.js** >= 1.1 (loaded via CDN or bundler — see [JavaScript Setup](#javascript-setup))
-- **Animate.css** >= 4.x (loaded via CDN or bundler — see [JavaScript Setup](#javascript-setup))
+- **Animate.css** >= 4.x — for the CSS keyframe animations (loaded via CDN or npm)
 
 ---
 
@@ -45,84 +47,110 @@ composer require laraextend/scroll-reveal
 
 > The ServiceProvider is registered automatically via Laravel's Auto-Discovery.
 
+---
+
 ### 2. JavaScript Setup
 
-This package only generates the HTML data-attributes that josh.js reads. You must include **josh.js** and its bundled **Animate.css** in your frontend yourself. Choose one of the two options below.
+This package generates the HTML `data-*` attributes for the animation driver. You have three options for the frontend setup — choose whichever fits your project.
 
 ---
 
-#### Option A — CDN (quick start, no build step)
+#### Option A — Built-in driver (recommended, zero npm dependency)
 
-No npm install needed. Add directly to your layout file (e.g. `resources/views/layouts/app.blade.php`).
+The package ships its own Intersection Observer driver. Publish it to your `public/` directory once:
+
+```bash
+php artisan vendor:publish --tag=scroll-reveal-assets
+```
+
+This copies `scroll-reveal-driver.js` to `public/vendor/scroll-reveal/scroll-reveal-driver.js`.
+
+Then add `<x-scroll-reveal-scripts>` and the Animate.css link to your layout (e.g. `resources/views/layouts/app.blade.php`):
 
 Inside `<head>`:
 
 ```html
-<!-- Animate.css (bundled with josh.js) -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/joshjs/css/animate.css"
-/>
+<!-- Animate.css -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css/animate.min.css" />
 ```
 
 Before the closing `</body>` tag:
 
-```html
-<!-- josh.js -->
-<script src="https://unpkg.com/joshjs/dist/josh.min.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    new Josh({
-      initClass: 'animateme',   // must match the class added by the component
-      offset: 0.2,              // fraction of element visible before animating
-    });
-  });
-</script>
+```blade
+{{-- Loads the published driver + auto-initializes + handles livewire:navigated --}}
+<x-scroll-reveal-scripts />
+```
+
+That is all. No npm install. No JS configuration. The component handles initialization and Livewire SPA navigation automatically.
+
+**Available props for `<x-scroll-reveal-scripts>`:**
+
+| Prop         | Type     | Default      | Description                                                    |
+|--------------|----------|--------------|----------------------------------------------------------------|
+| `initClass`  | `string` | `'animateme'`| CSS class the driver watches. Must match what the component sets.|
+| `offset`     | `float`  | `0.2`        | Fraction of the element that must be visible to trigger (0–1). |
+| `animateOut` | `bool`   | `false`      | Re-animate when an element leaves and re-enters the viewport.  |
+| `inline`     | `bool`   | `false`      | Embed the driver script inline instead of referencing the file (useful if you skip the publish step). |
+
+Inline mode (no publish step needed at all):
+
+```blade
+<x-scroll-reveal-scripts :inline="true" />
 ```
 
 ---
 
-#### Option B — npm + Vite bundler (recommended)
+#### Option B — npm + Vite bundler (Animate.css only)
 
-The npm package is **`joshjs`**. Animate.css is bundled inside it — no separate install needed.
+Use this option if you prefer to manage everything through your Vite build pipeline. The built-in driver is used for JavaScript — only Animate.css needs to be installed.
 
-**Step 1 — Install:**
+**Step 1 — Install Animate.css:**
 
 ```bash
-npm install joshjs
+npm install animate.css
 ```
 
-**Step 2 — Import in your JavaScript file** (e.g. `resources/js/app.js`):
+**Step 2 — Publish the driver asset** (once):
 
-```js
-import Josh from 'joshjs';
-
-let josh;
-
-function initJosh() {
-    if (josh) josh.destroy?.();
-    josh = new Josh({ initClass: 'animateme', offset: 0.2 });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initJosh();
-});
-
-// Re-initialize after Livewire SPA navigation
-document.addEventListener('livewire:navigated', initJosh);
+```bash
+php artisan vendor:publish --tag=scroll-reveal-assets
 ```
 
 **Step 3 — Import the CSS** in your stylesheet (e.g. `resources/css/app.css`):
 
 ```css
-@import 'joshjs/css/animate.css';
+@import 'animate.css';
 ```
 
-**Step 4 — Restart the dev server:**
+**Step 4 — Add `<x-scroll-reveal-scripts>` to your layout** before `</body>`:
+
+```blade
+<x-scroll-reveal-scripts />
+```
+
+**Step 5 — Restart the dev server:**
 
 ```bash
 npm run dev
 ```
+
+---
+
+#### Option C — CDN only (no build step, no npm)
+
+Inside `<head>`:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css/animate.min.css" />
+```
+
+Before the closing `</body>` tag:
+
+```blade
+<x-scroll-reveal-scripts />
+```
+
+---
 
 ### 3. Done!
 
@@ -213,7 +241,7 @@ All standard Blade and Livewire attributes pass through without extra configurat
 
 ---
 
-## 📐 Props Reference
+## 📐 `<x-scroll-reveal>` Props Reference
 
 | Prop        | Type     | Default     | Description                                                        |
 |-------------|----------|-------------|--------------------------------------------------------------------|
@@ -229,7 +257,7 @@ All additional attributes (e.g. `class`, `id`, `wire:*`, `x-*`, `data-*`) are fo
 
 ## 🎨 Animation Aliases
 
-All aliases are mapped to their corresponding **Animate.css** class names used by josh.js.
+All aliases are mapped to their corresponding **Animate.css** class names.
 
 ### Fade
 
@@ -305,39 +333,38 @@ return [
     'delay'     => 0,
     'as'        => 'div',
 
-    // Informational — use these values when initializing new Josh() in JS
-    'josh_options' => [
+    // Informational — mirrors the props of <x-scroll-reveal-scripts>
+    'driver_options' => [
         'initClass'  => 'animateme',
         'offset'     => 0.2,
-        'animateIn'  => true,
         'animateOut' => false,
     ],
 ];
 ```
 
-> Note: The component props override the config file defaults. The `josh_options` key is informational only — it is not automatically injected into JavaScript.
+> Note: The component props override the config defaults. The `driver_options` key is informational only — it is not automatically injected into JavaScript.
 
 ---
 
 ## 🔍 How It Works
 
 1. The `<x-scroll-reveal>` Blade component renders a standard HTML element.
-2. When `animate` is `true`, it adds the CSS class `animateme` and three `data-josh-*` attributes:
+2. When `animate` is `true`, it adds the CSS class `animateme` and three `data-*` attributes:
 
    ```html
    <div
      class="animateme your-classes"
-     data-josh-anim-name="fadeInUp"
-     data-josh-duration="550ms"
-     data-josh-anim-delay="0.2s"
+     data-sr-anim="fadeInUp"
+     data-sr-duration="550ms"
+     data-sr-delay="0.2s"
    >
      ...
    </div>
    ```
 
-3. josh.js observes all `.animateme` elements using the **Intersection Observer API**.
-4. When an element enters the viewport, josh.js reads the `data-josh-*` attributes and applies the corresponding Animate.css animation class.
-5. When `animate` is `false`, no attributes are added and a plain element is rendered — identical to writing the tag directly in Blade.
+3. The JavaScript driver observes all `.animateme` elements via the **Intersection Observer API**.
+4. When an element enters the viewport, the driver reads the `data-sr-*` attributes and applies the corresponding `animate__` CSS class from Animate.css.
+5. When `animate` is `false`, no attributes are added — a plain element is rendered.
 
 ---
 

@@ -16,9 +16,9 @@ it('has correct default props', function () {
         ->and($component->as)->toBe('div');
 });
 
-it('resolves the correct josh.js animation name for known aliases', function (string $alias, string $expected) {
+it('resolves the correct Animate.css animation name for known aliases', function (string $alias, string $expected) {
     $component = new ScrollReveal(animation: $alias);
-    expect($component->joshAnim)->toBe($expected);
+    expect($component->animName)->toBe($expected);
 })->with([
     ['fade',        'fadeIn'],
     ['fade-up',     'fadeInUp'],
@@ -40,26 +40,26 @@ it('resolves the correct josh.js animation name for known aliases', function (st
 
 it('falls back to fadeInUp for unknown animation aliases', function () {
     $component = new ScrollReveal(animation: 'unknown-alias');
-    expect($component->joshAnim)->toBe('fadeInUp');
+    expect($component->animName)->toBe('fadeInUp');
 });
 
 // ---------------------------------------------------------------------------
 // Delay handling
 // ---------------------------------------------------------------------------
 
-it('sets joshDelay to null when delay is 0', function () {
+it('sets animDelay to null when delay is 0', function () {
     $component = new ScrollReveal(delay: 0);
-    expect($component->joshDelay)->toBeNull();
+    expect($component->animDelay)->toBeNull();
 });
 
 it('converts delay from milliseconds to seconds string', function () {
     $component = new ScrollReveal(delay: 200);
-    expect($component->joshDelay)->toBe('0.2s');
+    expect($component->animDelay)->toBe('0.2s');
 });
 
 it('converts delay of 1000ms to 1s', function () {
     $component = new ScrollReveal(delay: 1000);
-    expect($component->joshDelay)->toBe('1s');
+    expect($component->animDelay)->toBe('1s');
 });
 
 // ---------------------------------------------------------------------------
@@ -77,20 +77,20 @@ it('returns full attributes array when animate is true', function () {
     $attrs = $component->animAttributes();
 
     expect($attrs)->toMatchArray([
-        'class'               => 'animateme',
-        'data-josh-anim-name' => 'fadeInUp',
-        'data-josh-duration'  => '550ms',
-        'data-josh-anim-delay' => '0.2s',
+        'class'            => 'animateme',
+        'data-sr-anim'     => 'fadeInUp',
+        'data-sr-duration' => '550ms',
+        'data-sr-delay'    => '0.2s',
     ]);
 });
 
-it('omits data-josh-anim-delay when delay is 0', function () {
+it('omits data-sr-delay when delay is 0', function () {
     $component = new ScrollReveal(animate: true, delay: 0);
 
     $attrs = $component->animAttributes();
 
     expect($attrs)->toHaveKey('class')
-        ->and($attrs)->not->toHaveKey('data-josh-anim-delay');
+        ->and($attrs)->not->toHaveKey('data-sr-delay');
 });
 
 it('returns empty array when animate is false', function () {
@@ -114,8 +114,6 @@ it('returns all supported animation aliases as an array', function () {
 // ---------------------------------------------------------------------------
 
 it('registers the scroll-reveal blade component', function () {
-    // Verifies that the service provider booted successfully and the
-    // component alias is resolvable.
     $aliases = app('blade.compiler')->getClassComponentAliases();
     expect($aliases)->toHaveKey('scroll-reveal');
 });

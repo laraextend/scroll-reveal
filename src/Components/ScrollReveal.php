@@ -7,7 +7,7 @@ use Illuminate\View\Component;
 class ScrollReveal extends Component
 {
     /**
-     * Maps package animation aliases to Animate.css class names used by josh.js.
+     * Maps package animation aliases to Animate.css class names.
      */
     private static array $animationMap = [
         // Fade
@@ -47,14 +47,14 @@ class ScrollReveal extends Component
     ];
 
     /**
-     * The resolved josh.js animation name.
+     * The resolved Animate.css animation name (e.g. "fadeInUp").
      */
-    public readonly string $joshAnim;
+    public readonly string $animName;
 
     /**
-     * The resolved josh.js delay string (e.g. "0.2s"), or null when no delay.
+     * The resolved animation delay string (e.g. "0.2s"), or null when no delay.
      */
-    public readonly ?string $joshDelay;
+    public readonly ?string $animDelay;
 
     /**
      * @param bool   $animate   Whether to apply scroll-reveal animation at all.
@@ -70,12 +70,12 @@ class ScrollReveal extends Component
         public readonly int $duration = 700,
         public readonly string $as = 'div',
     ) {
-        $this->joshAnim  = self::$animationMap[$animation] ?? 'fadeInUp';
-        $this->joshDelay = $delay > 0 ? ($delay / 1000).'s' : null;
+        $this->animName  = self::$animationMap[$animation] ?? 'fadeInUp';
+        $this->animDelay = $delay > 0 ? ($delay / 1000).'s' : null;
     }
 
     /**
-     * Returns the data-attributes array that josh.js reads.
+     * Returns the data-attributes array the scroll-reveal driver reads.
      * Returns an empty array when animations are disabled.
      */
     public function animAttributes(): array
@@ -85,13 +85,13 @@ class ScrollReveal extends Component
         }
 
         $attrs = [
-            'class'                => 'animateme',
-            'data-josh-anim-name'  => $this->joshAnim,
-            'data-josh-duration'   => "{$this->duration}ms",
+            'class'           => 'animateme',
+            'data-sr-anim'    => $this->animName,
+            'data-sr-duration' => "{$this->duration}ms",
         ];
 
-        if ($this->joshDelay !== null) {
-            $attrs['data-josh-anim-delay'] = $this->joshDelay;
+        if ($this->animDelay !== null) {
+            $attrs['data-sr-delay'] = $this->animDelay;
         }
 
         return $attrs;
