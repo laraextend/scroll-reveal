@@ -77,7 +77,6 @@ npm install animate.css
 
 ```js
 import './scroll-reveal-driver.js'; // sets window.ScrollRevealDriver
-import 'animate.css';
 
 let driver;
 
@@ -95,6 +94,8 @@ document.addEventListener('livewire:navigated', init);
 ```css
 @import 'animate.css';
 ```
+
+> CSS imports belong in CSS files — `@import 'animate.css'` in your stylesheet is sufficient. No need to also import it in `app.js`.
 
 **Step 5 — Restart the dev server:**
 
